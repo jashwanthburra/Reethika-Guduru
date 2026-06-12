@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reethika Guduru</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600;700&family=Great+Vibes&display=swap');
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --rose: #c2185b;
+      --gold: #d4af37;
+      --deep: #880e4f;
+      --light: #fce4ec;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      min-height: 100vh;
+      background: #0a0005;
+      overflow-x: hidden;
+      font-family: 'Cormorant Garamond', serif;
+    }
+
+    /* ── Canvas background ── */
+    #bgCanvas {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* ── Floating petals ── */
+    .petal {
+      position: fixed;
+      width: 10px;
+      height: 14px;
+      border-radius: 50% 0 50% 0;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 1;
+      animation: petalFall linear infinite;
+    }
+
+    @keyframes petalFall {
+      0%   { transform: translateY(-40px) rotate(0deg) scale(0.8); opacity: 0; }
+      10%  { opacity: 0.7; }
+      90%  { opacity: 0.5; }
+      100% { transform: translateY(110vh) rotate(720deg) scale(0.4); opacity: 0; }
+    }
+
+    /* ── Main wrapper ── */
+    .wrapper {
+      position: relative;
+      z-index: 2;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 20px 80px;
+    }
+
+    /* ── Ornamental top line ── */
+    .ornament {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 10px;
+      opacity: 0;
+      animation: fadeSlideDown 1.2s ease forwards 0.3s;
+    }
+
+    .ornament-line {
+      width: 80px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold));
+    }
+    .ornament-line.right {
+      background: linear-gradient(90deg, var(--gold), transparent);
+    }
+
+    .ornament-diamond {
+      width: 10px;
+      height: 10px;
+      background: var(--gold);
+      transform: rotate(45deg);
+      box-shadow: 0 0 12px var(--gold);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 8px var(--gold); }
+      50%       { box-shadow: 0 0 24px var(--gold), 0 0 40px rgba(212,175,55,0.4); }
+    }
+
+    /* ── Name ── */
+    .name-wrap {
+      text-align: center;
+      opacity: 0;
+      animation: fadeSlideDown 1.4s cubic-bezier(0.16,1,0.3,1) forwards 0.6s;
+      margin-bottom: 6px;
+    }
+
+    .name-sub {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(0.7rem, 2vw, 0.85rem);
+      letter-spacing: 8px;
+      color: var(--gold);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .name-main {
+      font-family: 'Great Vibes', cursive;
+      font-size: clamp(3rem, 10vw, 6.5rem);
+      background: linear-gradient(135deg, #f8c8d4, var(--gold), #f8c8d4, var(--rose));
+      background-size: 300% 300%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: shimmer 4s ease infinite;
+      filter: drop-shadow(0 0 30px rgba(212,175,55,0.3));
+      line-height: 1.1;
+    }
+
+    @keyframes shimmer {
+      0%   { background-position: 0% 50%; }
+      50%  { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .name-last {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-size: clamp(0.9rem, 3vw, 1.3rem);
+      letter-spacing: 10px;
+      color: rgba(255,255,255,0.6);
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+
+    /* ── Divider ── */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin: 24px 0 36px;
+      opacity: 0;
+      animation: fadeSlideDown 1.2s ease forwards 1s;
+    }
+
+    .divider-line {
+      flex: 1;
+      max-width: 140px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(212,175,55,0.6));
+    }
+    .divider-line.right {
+      background: linear-gradient(90deg, rgba(212,175,55,0.6), transparent);
+    }
+
+    .divider svg {
+      width: 22px;
+      height: 22px;
+      fill: var(--gold);
+      filter: drop-shadow(0 0 6px var(--gold));
+      animation: spin 8s linear infinite;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
+    }
+
+    /* ── Gallery ── */
+    .gallery {
+      display: flex;
+      gap: 28px;
+      flex-wrap: wrap;
+      justify-content: center;
+      width: 100%;
+      max-width: 760px;
+    }
+
+    .card {
+      position: relative;
+      opacity: 0;
+      transform: translateY(60px) scale(0.9);
+      animation: cardReveal 1s cubic-bezier(0.16,1,0.3,1) forwards;
+      cursor: pointer;
+    }
+
+    .card:nth-child(1) { animation-delay: 1.2s; }
+    .card:nth-child(2) { animation-delay: 1.5s; }
+
+    @keyframes cardReveal {
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* glowing border ring */
+    .card::before {
+      content: '';
+      position: absolute;
+      inset: -3px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, var(--gold), var(--rose), var(--gold), #f8c8d4);
+      background-size: 300% 300%;
+      animation: borderSpin 4s linear infinite;
+      z-index: -1;
+      filter: blur(1px);
+    }
+
+    @keyframes borderSpin {
+      0%   { background-position: 0% 50%; }
+      50%  { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* inner glow on hover */
+    .card::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 17px;
+      background: radial-gradient(circle at 50% 0%, rgba(212,175,55,0.25), transparent 70%);
+      opacity: 0;
+      transition: opacity 0.4s;
+      pointer-events: none;
+      z-index: 3;
+    }
+
+    .card:hover::after { opacity: 1; }
+
+    .card img {
+      display: block;
+      width: clamp(150px, 40vw, 310px);
+      height: clamp(200px, 52vw, 420px);
+      object-fit: cover;
+      object-position: center top;
+      border-radius: 17px;
+      transition: transform 0.5s cubic-bezier(0.16,1,0.3,1), filter 0.4s;
+      position: relative;
+      z-index: 2;
+    }
+
+    .card:nth-child(2) img { object-position: center center; }
+
+    .card:hover img {
+      transform: scale(1.04) translateY(-4px);
+      filter: brightness(1.08) saturate(1.1);
+    }
+
+    /* floating hearts on card */
+    .card .hearts {
+      position: absolute;
+      inset: 0;
+      border-radius: 17px;
+      overflow: hidden;
+      pointer-events: none;
+      z-index: 4;
+    }
+
+    .card .hearts span {
+      position: absolute;
+      bottom: -20px;
+      font-size: 14px;
+      opacity: 0;
+      animation: floatHeart 3s ease-in infinite;
+    }
+
+    @keyframes floatHeart {
+      0%   { transform: translateY(0) scale(0.8); opacity: 0; }
+      20%  { opacity: 0.8; }
+      100% { transform: translateY(-200px) scale(1.2); opacity: 0; }
+    }
+
+    /* ── Lightbox ── */
+    .lightbox {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 999;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .lightbox.active { display: flex; }
+
+    .lb-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.92);
+      backdrop-filter: blur(12px);
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+
+    .lb-content {
+      position: relative;
+      z-index: 2;
+      animation: lbZoom 0.4s cubic-bezier(0.16,1,0.3,1);
+    }
+
+    @keyframes lbZoom {
+      from { transform: scale(0.7); opacity: 0; }
+      to   { transform: scale(1);   opacity: 1; }
+    }
+
+    .lb-content img {
+      max-width: min(90vw, 600px);
+      max-height: 85vh;
+      border-radius: 16px;
+      object-fit: contain;
+      box-shadow: 0 0 60px rgba(212,175,55,0.4), 0 0 120px rgba(194,24,91,0.2);
+      border: 2px solid rgba(212,175,55,0.4);
+    }
+
+    .lb-close {
+      position: absolute;
+      top: -18px;
+      right: -18px;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--gold), var(--rose));
+      color: #fff;
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 0 20px rgba(212,175,55,0.5);
+      transition: transform 0.2s;
+    }
+
+    .lb-close:hover { transform: scale(1.2) rotate(90deg); }
+
+    /* ── Bottom tagline ── */
+    .tagline {
+      margin-top: 44px;
+      text-align: center;
+      opacity: 0;
+      animation: fadeSlideDown 1.2s ease forwards 2s;
+    }
+
+    .tagline p {
+      font-size: clamp(0.75rem, 2vw, 0.9rem);
+      letter-spacing: 5px;
+      color: rgba(255,255,255,0.3);
+      text-transform: uppercase;
+    }
+
+    @keyframes fadeSlideDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 480px) {
+      .gallery { gap: 16px; }
+      .ornament-line { width: 40px; }
+      .divider-line { max-width: 60px; }
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="bgCanvas"></canvas>
+
+<!-- Petals generated by JS -->
+
+<div class="wrapper">
+  <div class="ornament">
+    <div class="ornament-line"></div>
+    <div class="ornament-diamond"></div>
+    <div class="ornament-line right"></div>
+  </div>
+
+  <div class="name-wrap">
+    <div class="name-sub">✦ Matrimony Profile ✦</div>
+    <div class="name-main">Reethika</div>
+    <div class="name-last">Guduru</div>
+  </div>
+
+  <div class="divider">
+    <div class="divider-line"></div>
+    <svg viewBox="0 0 24 24"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>
+    <div class="divider-line right"></div>
+  </div>
+
+  <div class="gallery">
+    <div class="card" onclick="openLightbox('assets/pic1.jpg')">
+      <img src="assets/pic1.jpg" alt="Reethika Guduru" />
+      <div class="hearts">
+        <span style="left:15%;animation-delay:0s">🌸</span>
+        <span style="left:45%;animation-delay:1.1s">✨</span>
+        <span style="left:72%;animation-delay:2s">🌸</span>
+      </div>
+    </div>
+    <div class="card" onclick="openLightbox('assets/pic2.jpg')">
+      <img src="assets/pic2.jpg" alt="Reethika Guduru" />
+      <div class="hearts">
+        <span style="left:20%;animation-delay:0.5s">✨</span>
+        <span style="left:55%;animation-delay:1.6s">🌸</span>
+        <span style="left:80%;animation-delay:0.9s">✨</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="tagline">
+    <p>A soul as beautiful as her smile</p>
+  </div>
+</div>
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox">
+  <div class="lb-backdrop" onclick="closeLightbox()"></div>
+  <div class="lb-content">
+    <div class="lb-close" onclick="closeLightbox()">✕</div>
+    <img id="lb-img" src="" alt="Reethika Guduru" />
+  </div>
+</div>
+
+<script>
+  /* ── Particle / aurora canvas ── */
+  const canvas = document.getElementById('bgCanvas');
+  const ctx = canvas.getContext('2d');
+  let W, H, particles = [];
+
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  function randomBetween(a, b) { return a + Math.random() * (b - a); }
+
+  class Particle {
+    constructor() { this.reset(true); }
+    reset(initial) {
+      this.x = randomBetween(0, W);
+      this.y = initial ? randomBetween(0, H) : H + 10;
+      this.r = randomBetween(0.5, 2.5);
+      this.speed = randomBetween(0.2, 0.7);
+      this.opacity = randomBetween(0.2, 0.9);
+      this.hue = randomBetween(300, 360);
+      this.dx = randomBetween(-0.3, 0.3);
+    }
+    update() {
+      this.y -= this.speed;
+      this.x += this.dx;
+      if (this.y < -5) this.reset(false);
+    }
+    draw() {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+      ctx.fillStyle = `hsla(${this.hue},90%,80%,${this.opacity})`;
+      ctx.fill();
+    }
+  }
+
+  for (let i = 0; i < 160; i++) particles.push(new Particle());
+
+  /* aurora blobs */
+  let t = 0;
+  function drawAurora() {
+    const blobs = [
+      { x: 0.2, y: 0.3, r: 0.45, h: 310, s: 80, l: 20 },
+      { x: 0.8, y: 0.6, r: 0.4,  h: 340, s: 70, l: 18 },
+      { x: 0.5, y: 0.8, r: 0.5,  h: 280, s: 60, l: 16 },
+    ];
+    blobs.forEach((b, i) => {
+      const ox = Math.sin(t * 0.3 + i) * 0.05;
+      const oy = Math.cos(t * 0.2 + i) * 0.05;
+      const grd = ctx.createRadialGradient(
+        (b.x + ox) * W, (b.y + oy) * H, 0,
+        (b.x + ox) * W, (b.y + oy) * H, b.r * Math.min(W, H)
+      );
+      grd.addColorStop(0, `hsla(${b.h},${b.s}%,${b.l}%,0.35)`);
+      grd.addColorStop(1, 'transparent');
+      ctx.fillStyle = grd;
+      ctx.fillRect(0, 0, W, H);
+    });
+  }
+
+  function loop() {
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = '#0a0005';
+    ctx.fillRect(0, 0, W, H);
+    t += 0.01;
+    drawAurora();
+    particles.forEach(p => { p.update(); p.draw(); });
+    requestAnimationFrame(loop);
+  }
+  loop();
+
+  /* ── Falling petals ── */
+  const colors = ['#f48fb1','#f06292','#e91e63','#ffd700','#ff80ab'];
+  for (let i = 0; i < 18; i++) {
+    const p = document.createElement('div');
+    p.className = 'petal';
+    p.style.cssText = `
+      left: ${Math.random() * 100}vw;
+      background: ${colors[Math.floor(Math.random() * colors.length)]};
+      width: ${6 + Math.random() * 10}px;
+      height: ${8 + Math.random() * 12}px;
+      animation-duration: ${6 + Math.random() * 10}s;
+      animation-delay: ${Math.random() * 8}s;
+      border-radius: ${Math.random() > 0.5 ? '50% 0 50% 0' : '0 50% 0 50%'};
+      opacity: 0;
+    `;
+    document.body.appendChild(p);
+  }
+
+  /* ── Lightbox ── */
+  function openLightbox(src) {
+    document.getElementById('lb-img').src = src;
+    document.getElementById('lightbox').classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeLightbox() {
+    document.getElementById('lightbox').classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeLightbox();
+  });
+</script>
+</body>
+</html>
